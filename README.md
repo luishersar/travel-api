@@ -16,7 +16,4 @@ Una API construida en ASP.NET Core con autenticación JWT y Entity Framework Cor
 
 ## ⚙️ Configuración del proyecto
 
-1. **Clona el repositorio**:
-   ```bash
-   git clone https://github.com/tuusuario/tu-repo.git
-   cd tu-repo
+Se debe clonar el proyecto y ejecutar localmente para poder correr migraciones y tener las tablas que almientarán los endpoints desarrollados.
