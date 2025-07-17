@@ -1,84 +1,75 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using TravelRequestApi.Data;
+using TravelRequestApi.Services;
 
-
-namespace DemoTravelApi.Controllers
+namespace TravelRequestApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
     public class TravelRequestsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ITravelRequestService _travelRequestService;
 
-        public TravelRequestsController(ApplicationDbContext context)
+        public TravelRequestsController(ITravelRequestService travelRequestService)
         {
-            _context = context;
+            _travelRequestService = travelRequestService;
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateTravelRequest([FromBody] CreateTravelRequestDto dto)
         {
-            if (dto.Origin == dto.Destination)
-                return BadRequest("La ciudad de origen y destino deben ser diferentes.");
-
-            if (dto.StartDate >= dto.EndDate)
-                return BadRequest("La fecha de regreso debe ser posterior a la fecha de ida.");
-
-            var username = User.FindFirstValue(ClaimTypes.Name);
-
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (userIdClaim == null) return Unauthorized();
-
-            int userId = int.Parse(userIdClaim);
-
-
-            var travelRequest = new TravelRequest
+            try
             {
-                EmployeeName = username ?? "Unknown",
-                Origin = dto.Origin,
-                Destination = dto.Destination,
-                StartDate = dto.StartDate,
-                EndDate = dto.EndDate,
-                Purpose = dto.Purpose,
-                Status = TravelStatus.Pending,
-                UserId = userId 
+                var username = User.FindFirstValue(ClaimTypes.Name);
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            };
+                if (userIdClaim == null) return Unauthorized();
 
-            _context.TravelRequests.Add(travelRequest);
-            await _context.SaveChangesAsync();
+                int userId = int.Parse(userIdClaim);
 
-            return Ok(travelRequest);
+                var result = await _travelRequestService.CreateTravelRequestAsync(dto, userId, username);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("mine")]
         public async Task<IActionResult> GetMyRequests()
         {
-            var username = User.FindFirstValue(ClaimTypes.Name);
-            var requests = await _context.TravelRequests
-                .Where(r => r.EmployeeName == username)
-                .ToListAsync();
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userIdClaim == null) return Unauthorized();
 
-            return Ok(requests);
+                int userId = int.Parse(userIdClaim);
+
+                var requests = await _travelRequestService.GetMyRequestsAsync(userId);
+                return Ok(requests);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPut("{id}/status")]
         [Authorize(Roles = "Aprobador")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] TravelStatus status)
         {
-            var request = await _context.TravelRequests.FindAsync(id);
-            if (request == null)
-                return NotFound("Solicitud no encontrada.");
-
-            request.Status = status;
-            await _context.SaveChangesAsync();
-
-            return Ok(request);
+            try
+            {
+                var result = await _travelRequestService.UpdateStatusAsync(id, status);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

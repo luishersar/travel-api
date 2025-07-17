@@ -5,6 +5,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using TravelRequestApi.Data;
 using System.Security.Claims;
+using TravelRequestApi.Services; // ← AGREGAR ESTA LÍNEA
 
 public class MainApp
 {
@@ -16,6 +17,10 @@ public class MainApp
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
         builder.Services.AddControllers();
+
+        // ← AGREGAR ESTAS LÍNEAS AQUÍ
+        builder.Services.AddScoped<IAuthService, AuthService>();
+        builder.Services.AddScoped<ITravelRequestService, TravelRequestService>();
 
         var jwtKey = builder.Configuration["Jwt:Key"];
         var jwtIssuer = builder.Configuration["Jwt:Issuer"];
