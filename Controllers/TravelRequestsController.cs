@@ -19,7 +19,6 @@ namespace DemoTravelApi.Controllers
             _context = context;
         }
 
-        // POST: api/TravelRequests
         [HttpPost]
         public async Task<IActionResult> CreateTravelRequest([FromBody] CreateTravelRequestDto dto)
         {
@@ -57,7 +56,6 @@ namespace DemoTravelApi.Controllers
             return Ok(travelRequest);
         }
 
-        // GET: api/TravelRequests/mine
         [HttpGet("mine")]
         public async Task<IActionResult> GetMyRequests()
         {
@@ -69,7 +67,6 @@ namespace DemoTravelApi.Controllers
             return Ok(requests);
         }
 
-        // PUT: api/TravelRequests/{id}/status
         [HttpPut("{id}/status")]
         [Authorize(Roles = "Aprobador")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] TravelStatus status)

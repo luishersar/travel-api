@@ -12,14 +12,11 @@ public class MainApp
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // 1. Configuración de Entity Framework con SQL Server
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        // 2. Configuración de controladores
         builder.Services.AddControllers();
 
-        // 3. Configuración de JWT
         var jwtKey = builder.Configuration["Jwt:Key"];
         var jwtIssuer = builder.Configuration["Jwt:Issuer"];
         var key = Encoding.ASCII.GetBytes(jwtKey!);
@@ -45,7 +42,6 @@ public class MainApp
         });
 
 
-        // 4. Swagger con autenticación JWT
         builder.Services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Travel API", Version = "v1" });
@@ -71,7 +67,6 @@ public class MainApp
 
         var app = builder.Build();
 
-        // 5. Middleware
         if (app.Environment.IsDevelopment())
         {   
             app.UseSwagger();
@@ -80,7 +75,7 @@ public class MainApp
 
         app.UseHttpsRedirection();
 
-        app.UseAuthentication(); // JWT
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();

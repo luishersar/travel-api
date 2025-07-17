@@ -20,7 +20,6 @@ public class AuthController : ControllerBase
         _config = config;
     }
 
-    // POST: api/auth/register
     [HttpPost("register")]
     public IActionResult Register([FromBody] RegisterDto dto)
     {
@@ -41,7 +40,6 @@ public class AuthController : ControllerBase
         return Ok("Usuario registrado correctamente.");
     }
 
-    // POST: api/auth/login
     [HttpPost("login")]
     public IActionResult Login([FromBody] LoginDto dto)
     {
@@ -55,7 +53,6 @@ public class AuthController : ControllerBase
         return Ok(new AuthResponseDto { Token = token, Role = user.Role });
     }
 
-    // POST: api/auth/forgot-password
     [HttpPost("forgot-password")]
     public IActionResult ForgotPassword([FromBody] ForgotPasswordDto dto)
     {
@@ -68,10 +65,9 @@ public class AuthController : ControllerBase
 
         _context.SaveChanges();
 
-        return Ok(new { Code = code }); // Simulamos envío por correo
+        return Ok(new { Code = code });
     }
 
-    // POST: api/auth/reset-password
     [HttpPost("reset-password")]
     public IActionResult ResetPassword([FromBody] ResetPasswordDto dto)
     {
@@ -93,7 +89,6 @@ public class AuthController : ControllerBase
         return Ok("Contraseña actualizada correctamente.");
     }
 
-    // Utilidad: generar token JWT
     private string GenerateJwtToken(User user)
     {
         var claims = new[]
